@@ -1,6 +1,8 @@
 package com.example.myapplication.adapter;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Paint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,7 +51,7 @@ public class TODOADapter extends RecyclerView.Adapter<TODOADapter.ViewHolder> {
         TODO todo = arrayList.get(position);
        holder.txtTitle.setText(todo.getTitle());
        holder.txtDate.setText(todo.getDate());
-        holder.cb.setOnCheckedChangeListener(null); // Bỏ bắt sự kiện trước khi thiết lập trạng thái
+        holder.cb.setOnCheckedChangeListener(null);
         holder.cb.setChecked(todo.getStatus() == 1);
 
         if (todo.getStatus() == 1) {
@@ -65,16 +67,19 @@ public class TODOADapter extends RecyclerView.Adapter<TODOADapter.ViewHolder> {
             tododao.update(todo);
             notifyItemChanged(position);
         });
-        holder.imgDelete.setOnClickListener(new View.OnClickListener() {
-           @Override
-           public void onClick(View view) {
-               if(tododao.delete(todo.getId())>0){
-                   Toast.makeText(context, "Xóa thành công", Toast.LENGTH_SHORT).show();
-                   arrayList.remove(todo);
-                   notifyDataSetChanged();
-               }
-           }
-       });
+        holder.imgDelete.setOnClickListener(view -> {
+            AlertDialog.Builder builder = new AlertDialog.Builder(context);
+            builder.setTitle("Xác nhận xóa")
+                    .setMessage("Bạn có chắc chắn muốn xóa công việc này?")
+                    .setPositiveButton("Xóa", (dialog, which) -> {
+                        if(tododao.delete(todo.getId())>0){
+                            arrayList.remove(position);
+                            notifyDataSetChanged();
+                        }
+                    })
+                    .setNegativeButton("Hủy", (dialog, which) -> dialog.dismiss());
+            builder.show();
+        });
        holder.imgEdit.setOnClickListener(new View.OnClickListener() {
            @Override
            public void onClick(View view) {
